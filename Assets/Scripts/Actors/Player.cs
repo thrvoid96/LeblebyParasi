@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour
-{
-    [SerializeField] private List<GameObject> coinsOnScene = new List<GameObject>();
+{   
     [SerializeField] private int coinDeselectDistance;
 
-    private List<GameObject> unselectedCoins = new List<GameObject>();
+    public List<Coin> coinsOnScene = new List<Coin>();
+    private List<Coin> unselectedCoins = new List<Coin>();
     private bool coinIsSelected;
-    private GameObject selectedCoin;
+    private Coin selectedCoin;
 
-    private Vector2 startTouchPos,endTouchPos;
+    private Vector2 startTouchPos, endTouchPos;
 
     private void OnEnable()
     {
@@ -20,8 +20,7 @@ public class Player : MonoBehaviour
         EventManager.StartListening(Events.ScreenUnTouched, OnTapEnded);
         EventManager.StartListening(Events.CoinSelected, OnCoinSelected);
         EventManager.StartListening(Events.CoinDeselected, OnCoinDeselected);
-        EventManager.StartListening(Events.CoinTravelling, OnCoinTravelling);
-
+        EventManager.StartListening(Events.CoinTravelling, OnCoinStartMove);
     }
 
 
@@ -32,27 +31,42 @@ public class Player : MonoBehaviour
         EventManager.StopListening(Events.ScreenUnTouched, OnTapEnded);
         EventManager.StopListening(Events.CoinSelected, OnCoinSelected);
         EventManager.StopListening(Events.CoinDeselected, OnCoinDeselected);
-        EventManager.StopListening(Events.CoinTravelling, OnCoinTravelling);
-
+        EventManager.StopListening(Events.CoinTravelling, OnCoinStartMove);
     }
 
     private void OnTap(EventParam param)
     {
-        //I dont know if declaring variables here is bad
+        findCoinWithRayCast(param);       
+    }
 
+    private void findCoinWithRayCast(EventParam param)
+    {
         Ray ray = Camera.main.ScreenPointToRay(param.fingerDownPos);
         int coinLayerMask = LayerMask.GetMask("Coin");
         RaycastHit hit;
 
         if (Physics.Raycast(ray, out hit, float.PositiveInfinity, coinLayerMask))
         {
+            var coin = hit.collider.gameObject.GetComponent<Coin>();
+
+            checkIfCoinIsInteractable(param ,coin);
+        }
+    }
+
+    private void checkIfCoinIsInteractable(EventParam param, Coin coin)
+    {
+        if (coin.throwableAmount == 0)
+        {
+            Debug.LogError("O parayý çok fazla kullandýn :(");
+        }
+        else
+        {
             EventManager.TriggerEvent(Events.CoinSelected,
                 new EventParam
                 {
-                    tappedCoin = hit.collider.gameObject,
+                    tappedCoin = coin,
                     fingerDownPos = param.fingerDownPos
                 });
-            //Enable UI arrow
         }
     }
 
@@ -60,16 +74,23 @@ public class Player : MonoBehaviour
     {
         coinIsSelected = false;
     }
- 
+
     private void OnCoinSelected(EventParam param)
+    {
+        setUnselectedCoins(param);
+
+        selectedCoin.activatePowerBar(true);
+
+        StartCoroutine(checkCoinSendDirection());
+    }
+
+    private void setUnselectedCoins(EventParam param)
     {
         coinIsSelected = true;
 
         selectedCoin = param.tappedCoin;
 
         startTouchPos = param.fingerDownPos;
-
-        selectedCoin.GetComponent<Coin>().isSelected = true;
 
         for (int i = 0; i < coinsOnScene.Capacity; i++)
         {
@@ -79,6 +100,12 @@ public class Player : MonoBehaviour
             }
         }
 
+        createLineBetweenUnselectedCoins();
+
+    }
+
+    private void createLineBetweenUnselectedCoins()
+    {
         List<Vector3> positions = new List<Vector3>();
 
         for (int i = 0; i < unselectedCoins.Count; i++)
@@ -93,12 +120,19 @@ public class Player : MonoBehaviour
         };
 
         EventManager.TriggerEvent(Events.PositionsSet, eventParam);
-        positions.Clear();       
 
-        StartCoroutine(checkCoinSendDirection());
+        positions.Clear();
     }
 
     private void OnCoinDeselected(EventParam param)
+    {
+        closeLineRenderer();
+
+        resetValues();
+        
+    }
+
+    private void closeLineRenderer()
     {
         var emptyPositions = new Vector3[CoinLineRendererController.instance.GetPositionCount()];
 
@@ -109,22 +143,22 @@ public class Player : MonoBehaviour
         };
 
         EventManager.TriggerEvent(Events.PositionsSet, eventParam);
+    }  
 
-        selectedCoin.GetComponent<Coin>().isSelected = false;
-        coinIsSelected = false;
-        selectedCoin = null;
-        unselectedCoins.Clear();
+    private void OnCoinStartMove(EventParam param)
+    {
+        resetValues();
     }
 
-    private void OnCoinTravelling(EventParam param)
+    private void resetValues()
     {
         coinIsSelected = false;
         selectedCoin = null;
         unselectedCoins.Clear();
     }
-    
+
     private void SwipeDetector_OnSwipe(SwipeData data)
-    { 
+    {
         endTouchPos = data.fingerDownPos;
     }
 
@@ -132,14 +166,25 @@ public class Player : MonoBehaviour
     {
         while (true)
         {
-            if (Vector2.Distance(startTouchPos, endTouchPos) <= coinDeselectDistance && !coinIsSelected)
+            var distance = Vector2.Distance(startTouchPos, endTouchPos);
+            var direction = startTouchPos - endTouchPos;
+
+            selectedCoin.turnCoin(distance, direction);
+
+            //Debug.LogError(distance);
+            if (distance <= coinDeselectDistance && !coinIsSelected)
             {
-                EventManager.TriggerEvent(Events.CoinDeselected, new EventParam { tappedCoin = selectedCoin, fingerDownPos = endTouchPos});
+                selectedCoin.activatePowerBar(false);
+                EventManager.TriggerEvent(Events.CoinDeselected, new EventParam { tappedCoin = selectedCoin });                
+
                 yield break;
             }
-            else if(Vector2.Distance(startTouchPos, endTouchPos) > coinDeselectDistance && !coinIsSelected)
+            else if (distance > coinDeselectDistance && !coinIsSelected)
             {
-                EventManager.TriggerEvent(Events.CoinTravelling, new EventParam { tappedCoin = selectedCoin, fingerDownPos = endTouchPos });
+                selectedCoin.activatePowerBar(false);
+                selectedCoin.throwableAmount--;
+                EventManager.TriggerEvent(Events.CoinTravelling, new EventParam { tappedCoin = selectedCoin, DirectionVector = startTouchPos - endTouchPos, fingerDownPos = startTouchPos, fingerUpPos = endTouchPos });
+                
                 yield break;
             }
 

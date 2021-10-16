@@ -51,6 +51,11 @@ public class EventManager : MonoBehaviour
         instance = null;
     }
 
+    private void Awake()
+    {
+        DontDestroyOnLoad(this.gameObject);
+    }
+
     private void Init()
     {
         if (eventDictionary == null)
@@ -98,7 +103,9 @@ public struct EventParam
     public Vector2 fingerUpPos;
     public Vector2 DirectionVector;
     public Vector3[] linePositions;
-    public GameObject tappedCoin;
+    public Coin tappedCoin;
     public float DistanceX;
-
+    public string topText;
+    public string bottomText;
+    public bool levelWon;
 }

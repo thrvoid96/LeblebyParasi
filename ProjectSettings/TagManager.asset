@@ -7,6 +7,8 @@ TagManager:
   - Coin
   - CoinLine
   - Goal
+  - GoalKeeper
+  - Obstacle
   layers:
   - Default
   - TransparentFX
@@ -19,8 +21,8 @@ TagManager:
   - Goal
   - CoinLine
   - Player
-  - 
-  - 
+  - GoalKeeper
+  - Obstacle
   - 
   - 
   - 

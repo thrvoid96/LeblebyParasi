@@ -22,7 +22,7 @@ public class CoinLineCollision : MonoBehaviour
 
     private void OnDisable()
     {
-        EventManager.StartListening(Events.PositionsSet, PositionsSet);
+        EventManager.StopListening(Events.PositionsSet, PositionsSet);
     }
 
     private void PositionsSet(EventParam param)
@@ -40,11 +40,12 @@ public class CoinLineCollision : MonoBehaviour
 
         if (distance != 0)
         {
+            boxCol.enabled = true;
             boxCol.size = new Vector3(width, 0.5f, Vector3.Distance(positions[0], positions[1]) - 1.1f);
         }
         else
         {
-            boxCol.size = new Vector3(0, 0, 0);
+            boxCol.enabled = false;
             return;
         }
         

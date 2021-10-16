@@ -26,7 +26,7 @@ public class SwipeDetector : MonoBehaviour
     private void OnDisable()
     {
         EventManager.StopListening(Events.CoinTravelling, disableTouch);
-        EventManager.StartListening(Events.CoinStopped, enableTouch);
+        EventManager.StopListening(Events.CoinStopped, enableTouch);
     }
 
     private void disableTouch(EventParam param)
