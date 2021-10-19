@@ -5,7 +5,7 @@ using UnityEngine;
 public class CoinCollisions : MonoBehaviour
 {
     private Coin coin;
-    private void Start()
+    private void Awake()
     {
         coin = GetComponent<Coin>();
     }

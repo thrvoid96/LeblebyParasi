@@ -508,7 +508,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   goalTransform: {fileID: 0}
   player: {fileID: 0}
-  powerArrowGameObject: {fileID: 3023123212181331546}
+  powerArrow: {fileID: 7073362800225789307}
   interiorFillImage: {fileID: 809673912778149696}
   coinThrowableAmount: 4
   usedCoinMat: {fileID: 2100000, guid: 880410fb48e6b0b49ad7e2055d49aa77, type: 2}

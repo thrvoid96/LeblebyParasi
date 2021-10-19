@@ -9,7 +9,7 @@ public class Coin : MonoBehaviour
 {
     [SerializeField] private Transform goalTransform;
     [SerializeField] private Player player;
-    [SerializeField] private GameObject powerArrowGameObject;
+    [SerializeField] private RectTransform powerArrow;
     [SerializeField] private Image interiorFillImage;
     [SerializeField] private int coinThrowableAmount;
     [SerializeField] private Material usedCoinMat;
@@ -177,15 +177,17 @@ public class Coin : MonoBehaviour
         CoinLineRendererController.instance.SetColor(Color.red);
     }
 
-    public void turnCoin(float touchDistance, Vector3 direction)
+    public void rotatePowerBar(float touchDistance, Vector2 fingerDownPos)
     {
         interiorFillImage.fillAmount = Mathf.Clamp(touchDistance / 200f, 0, 1);
-        transform.rotation = Quaternion.LookRotation(new Vector3(direction.x, 0, direction.y));
+
+        var worldPos = Camera.main.ScreenToWorldPoint(fingerDownPos);
+        powerArrow.LookAt(worldPos);
     }
 
     public void activatePowerBar(bool value)
     {
-        powerArrowGameObject.SetActive(value);
+        powerArrow.gameObject.SetActive(value);
     }
 
     private IEnumerator checkIfCoinStopped()

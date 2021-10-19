@@ -19,6 +19,8 @@ public class SwipeDetector : MonoBehaviour
     private void OnEnable()
     {
         EventManager.StartListening(Events.CoinTravelling, disableTouch);
+        EventManager.StartListening(Events.LevelWon, disableTouch);
+        EventManager.StartListening(Events.LevelLost, disableTouch);        
         EventManager.StartListening(Events.CoinStopped, enableTouch);
     }
 
@@ -26,6 +28,8 @@ public class SwipeDetector : MonoBehaviour
     private void OnDisable()
     {
         EventManager.StopListening(Events.CoinTravelling, disableTouch);
+        EventManager.StopListening(Events.LevelWon, disableTouch);
+        EventManager.StopListening(Events.LevelLost, disableTouch);        
         EventManager.StopListening(Events.CoinStopped, enableTouch);
     }
 

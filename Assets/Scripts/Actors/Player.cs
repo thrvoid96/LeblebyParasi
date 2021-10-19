@@ -36,7 +36,7 @@ public class Player : MonoBehaviour
 
     private void OnTap(EventParam param)
     {
-        findCoinWithRayCast(param);       
+        findCoinWithRayCast(param);
     }
 
     private void findCoinWithRayCast(EventParam param)
@@ -169,7 +169,7 @@ public class Player : MonoBehaviour
             var distance = Vector2.Distance(startTouchPos, endTouchPos);
             var direction = startTouchPos - endTouchPos;
 
-            selectedCoin.turnCoin(distance, direction);
+            selectedCoin.rotatePowerBar(distance, endTouchPos);
 
             //Debug.LogError(distance);
             if (distance <= coinDeselectDistance && !coinIsSelected)
