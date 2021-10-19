@@ -418,6 +418,8 @@ GameObject:
   - component: {fileID: 7746431109908343808}
   - component: {fileID: 7746431109908343823}
   - component: {fileID: 632568832523764864}
+  - component: {fileID: 6223256390575343175}
+  - component: {fileID: 2137959797893922612}
   - component: {fileID: 2326454290734550561}
   - component: {fileID: 9157626446858497807}
   m_Layer: 6
@@ -513,6 +515,30 @@ MonoBehaviour:
   speed: 15
   maxForce: 3000
   coinThrowAmountUGUI: {fileID: 2335384293267369920}
+--- !u!114 &6223256390575343175
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7746431109908343821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 216030169df7ee04e93dc761a7b0dc01, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2137959797893922612
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7746431109908343821}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4f78e2a5e0c86dd40ae435530f253aac, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!54 &2326454290734550561
 Rigidbody:
   m_ObjectHideFlags: 0

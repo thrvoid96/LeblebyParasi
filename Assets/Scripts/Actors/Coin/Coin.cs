@@ -18,8 +18,7 @@ public class Coin : MonoBehaviour
     [SerializeField] private TextMeshProUGUI coinThrowAmountUGUI;
 
     private MeshRenderer meshRenderer;
-    private bool isSelected;
-    
+    private bool lineIsTouched;
 
     public int throwableAmount
     {
@@ -27,108 +26,31 @@ public class Coin : MonoBehaviour
         set { coinThrowableAmount = value; }
     }
 
-    private Vector3 startPos,endPos;
-    private bool touchedLine;
+    public bool touchedLine
+    {
+        get { return lineIsTouched; }
+        set { lineIsTouched = value; }
+    }
+
+    private Vector3 startPos, endPos;
     private Rigidbody rb;
-   
-    private void OnEnable()
-    {
-        EventManager.StartListening(Events.CoinTravelling, startMovement);
-        EventManager.StartListening(Events.CoinStopped, endMovement);     
-    }
 
 
-    private void OnDisable()
-    {
-        EventManager.StopListening(Events.CoinTravelling, startMovement);
-        EventManager.StopListening(Events.CoinStopped, endMovement);      
-    }
 
-    private void Start()
+    private void Awake()
     {
         startPos = transform.position;
         coinThrowAmountUGUI.text = throwableAmount.ToString();
         rb = GetComponent<Rigidbody>();
         meshRenderer = GetComponent<MeshRenderer>();
-    }  
+    }
 
     //Calculate win/lose events
-    private void OnTriggerEnter(Collider other)
+
+
+    public void startMovement(EventParam param)
     {
-        if (isSelected)
-        {
-            if (other.CompareTag("CoinLine"))
-            {
-                CoinLineRendererController.instance.SetColor(Color.green);
-                touchedLine = true;
-            }
-            else if (other.CompareTag("Goal"))
-            {
-                if (!touchedLine)
-                {
-                    EventManager.TriggerEvent(Events.LevelLost, new EventParam { topText = "Level Failed!", bottomText = "Hakem ofsayt var :(", levelWon = false });
-                }
-                else
-                {
-                    EventManager.TriggerEvent(Events.LevelWon, new EventParam { topText = "Level Cleared!", bottomText = "Vurdu ve GOOOOOOOOOOOOOOOOOOOOOOOOOOOL", levelWon = true });
-                }
-            }
-        }
-    }
-
-    // Calculate win/lose events
-    private void OnCollisionEnter(Collision collision)
-    {
-        if (isSelected)
-        {
-            if (collision.gameObject.CompareTag("Coin"))
-            {
-                if (!touchedLine)
-                {
-                    EventManager.TriggerEvent(Events.LevelLost, new EventParam { topText = "Level Failed!", bottomText = "Çizgiden geçmeden önce baþka bir paraya dokundun :(", levelWon = false });
-
-                }
-                else
-                {
-                    Debug.LogError("Çizgiden geçip baþka bir paraya dokundun :)");
-                }               
-            }
-            else if (collision.gameObject.CompareTag("GoalKeeper"))
-            {
-
-                if (!touchedLine)
-                {
-                    EventManager.TriggerEvent(Events.LevelLost, new EventParam { topText = "Level Failed!", bottomText = "Ofsayt yapmana raðmen kaleci tuttu :(", levelWon = false });
-
-                }
-                else
-                {
-                    EventManager.TriggerEvent(Events.LevelLost, new EventParam { topText = "Level Failed!", bottomText = "Hayýr olamazzz, þutun kaleci tarafýndan tutuldu :(", levelWon = false });
-                }                
-            }
-            else if (collision.gameObject.CompareTag("Obstacle"))
-            {
-                if (!touchedLine)
-                {
-                    EventManager.TriggerEvent(Events.LevelLost, new EventParam { topText = "Level Failed!", bottomText = "Bari çizgiyi geçseydin, duvara kafa attýn :(", levelWon = false });
-                }
-                else
-                {
-                    EventManager.TriggerEvent(Events.LevelLost, new EventParam { topText = "Level Failed!", bottomText = "Duvarý geçemedin :(", levelWon = false });
-                }
-            }
-        }
-    }
-
-    private void startMovement(EventParam param)
-    {
-        if (param.tappedCoin == this) { isSelected = true; } else { isSelected = false; }
-
-        if (isSelected)
-        {
-            moveObjectTowardsDirection(param);
-        }      
-                   
+        moveObjectTowardsDirection(param);
     }
 
     private void moveObjectTowardsDirection(EventParam param)
@@ -145,19 +67,17 @@ public class Coin : MonoBehaviour
         StartCoroutine(checkIfCoinStopped());
     }
 
-    private void endMovement(EventParam param)
+    public void endMovement(EventParam param)
     {
-        if (isSelected)
-        {
-            checkIfNoMovesLeft();
 
-            closeLineRenderer();
+        checkIfNoMovesLeft();
 
-            calculateCoinEvents();
+        closeLineRenderer();
 
-            touchedLine = false;
-        }            
-        
+        calculateCoinEvents();
+
+        touchedLine = false;
+
     }
 
     private void checkIfNoMovesLeft()
@@ -277,7 +197,7 @@ public class Coin : MonoBehaviour
             //Debug.LogError(rb.velocity.magnitude);
             if (rb.velocity.magnitude <= 0.1f)
             {
-                EventManager.TriggerEvent(Events.CoinStopped, new EventParam ());
+                EventManager.TriggerEvent(Events.CoinStopped, new EventParam { tappedCoin = this }) ;
                 endPos = transform.position;
                 yield break;
             }
